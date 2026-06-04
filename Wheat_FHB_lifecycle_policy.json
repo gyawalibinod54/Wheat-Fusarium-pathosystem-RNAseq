@@ -1,0 +1,46 @@
+{
+  "Rules": [
+    {
+      "ID": "WheatFHB-Archive-Raw-FASTQ-Glacier-30days",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "Wheat_FHB/raw_data/"
+      },
+      "Transitions": [
+        {
+          "Days": 30,
+          "StorageClass": "GLACIER"
+        }
+      ]
+    },
+    {
+      "ID": "WheatFHB-Archive-Genome-Glacier-60days",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "Wheat_FHB/genome/"
+      },
+      "Transitions": [
+        {
+          "Days": 60,
+          "StorageClass": "GLACIER"
+        }
+      ]
+    },
+    {
+      "ID": "WheatFHB-Keep-Results-Standard",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "Wheat_FHB/results/"
+      },
+      "Transitions": []
+    },
+    {
+      "ID": "WheatFHB-Keep-DESeq2-Results-Standard",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "Wheat_FHB/deseq2_results/"
+      },
+      "Transitions": []
+    }
+  ]
+}
