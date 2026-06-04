@@ -79,4 +79,3 @@ Name: Run, dtype: int64
   S8           n= 12  PAIRED  Illumina HiSeq 2500                       tissue=
   S9           n= 22  SINGLE  Illumina Genome Analyzer IIx              tissue=
 
-Master execution guide for Wheat FHB multi-study R
