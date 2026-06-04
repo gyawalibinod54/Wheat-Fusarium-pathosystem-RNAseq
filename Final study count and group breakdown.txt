@@ -1,0 +1,82 @@
+bash
+
+cd /mnt/user-data/uploads && python3 << 'EOF'
+import pandas as pd
+df = pd.read_excel('Wheat_RNAseq_from_multiple_studies.xlsx')
+
+# Get S12 full cultivar list with FHB groups
+s12 = df[df['Run'].str.startswith('SRR1467', na=False) | df['Run'].str.startswith('SRR1467', na=False)]
+s12_full = df[(df['Run'] >= 'SRR14673823') & (df['Run'] <= 'SRR14674100')]
+print(f"S12 samples: {len(s12_full)}")
+print(s12_full.groupby('Fusarium_head_blight_resistance_group')['Run'].count())
+print("\nSumai3 vs non:")
+print(s12_full.groupby('Sumai3_versus_non_Sumai3_descendant')['Run'].count())
+
+# Count by study
+def get_study(run):
+    if run.startswith('SRR856'): return 'S1'
+    if run.startswith('SRR177'): return 'S2'
+    if run.startswith('SRR862'): return 'S3'
+    if run.startswith('SRR1942'): return 'S4'
+    if run.startswith('SRR8309'): return 'S5'
+    if run.startswith('SRR1316') or run.startswith('SRR1317'): return 'S6'
+    if run == 'SRR639194': return 'S7_EXCLUDED'
+    if run.startswith('SRR2096'): return 'S8'
+    if run.startswith('ERR2275'): return 'S9'
+    if run.startswith('SRR1058'): return 'S10'
+    if run.startswith('SRR309'): return 'S11'
+    if run >= 'SRR14673823' and run <= 'SRR14674100': return 'S12'
+    if run.startswith('SRR1234'): return 'S11b'
+    if run.startswith('SRR1702'): return 'S13'
+    if run.startswith('SRR1695'): return 'S14'
+    if run.startswith('ERR120'): return 'S15'
+    return 'other'
+
+df['study'] = df['Run'].apply(get_study)
+summary = df.groupby('study').agg(
+    n=('Run','count'),
+    layout=('LibraryLayout', lambda x: '+'.join(sorted(x.unique()))),
+    tissue=('tissue', lambda x: '/'.join(sorted(set(str(v) for v in x if str(v)!='nan')))[:70]),
+    cultivar=('Cultivar', lambda x: str(len(x.unique())) + ' cultivars'),
+    instrument=('Instrument', lambda x: '/'.join(sorted(x.unique()))[:60]),
+).reset_index()
+print("\n=== COMPLETE STUDY SUMMARY ===")
+for _, r in summary.iterrows():
+    print(f"  {r['study']:12} n={r['n']:3}  {r['layout']:6}  {r['instrument'][:40]:40}  tissue={r['tissue'][:40]}")
+EOF
+Output
+
+S12 samples: 192
+Fusarium_head_blight_resistance_group
+Resistant                  36
+excluded                   12
+highly_resistant_Sumai3    18
+moderate_resistance        90
+susceptible                36
+Name: Run, dtype: int64
+
+Sumai3 vs non:
+Sumai3_versus_non_Sumai3_descendant
+Sumai3         30
+non-Sumai3    162
+Name: Run, dtype: int64
+
+=== COMPLETE STUDY SUMMARY ===
+  S1           n= 12  PAIRED  Illumina HiSeq 2500                       tissue=spikelets
+  S10          n=  2  PAIRED  Illumina HiSeq 4000                       tissue=spike
+  S11          n= 15  PAIRED  Illumina HiSeq 2500                       tissue=spikelets
+  S11b         n=  6  PAIRED  Illumina HiSeq 2000                       tissue=Mutant strain osp24 infected spikelet/Wi
+  S12          n=192  PAIRED  Illumina HiSeq 2500                       tissue=spike and rachis
+  S13          n= 12  SINGLE  BGISEQ-500                                tissue=spikelet and rachis
+  S14          n=  7  PAIRED  HiSeq X Ten                               tissue=wheat grains
+  S15          n= 72  PAIRED  Illumina HiSeq 2000                       tissue=
+  S2           n= 22  PAIRED  Illumina HiSeq 2000                       tissue=Rachis/Spikelet
+  S3           n=  2  PAIRED  Illumina HiSeq 4000                       tissue=Rachis
+  S4           n= 12  PAIRED  Illumina HiSeq 2000                       tissue=leaf
+  S5           n=100  PAIRED  Illumina HiSeq 2500                       tissue=whole head
+  S6           n= 12  PAIRED  Illumina HiSeq 2500                       tissue=Spike
+  S7_EXCLUDED  n=  1  SINGLE  Illumina HiSeq 2000                       tissue=
+  S8           n= 12  PAIRED  Illumina HiSeq 2500                       tissue=
+  S9           n= 22  SINGLE  Illumina Genome Analyzer IIx              tissue=
+
+Master execution guide for Wheat FHB multi-study R
